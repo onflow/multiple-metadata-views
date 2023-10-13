@@ -12,7 +12,6 @@ const transactionExplanationPath = `${recipe}/explanations/transaction.txt`;
 export const multipleMetadataViews = {
   slug: recipe,
   title: "Multiple Metadata Views",
-  description: "",
   createdAt: Date(2022, 3, 1),
   author: "Flow Blockchain",
   playgroundLink:
