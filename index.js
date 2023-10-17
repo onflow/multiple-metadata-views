@@ -12,7 +12,7 @@ const transactionExplanationPath = `${recipe}/explanations/transaction.txt`;
 export const multipleMetadataViews = {
   slug: recipe,
   title: "Multiple Metadata Views",
-  createdAt: Date(2022, 3, 1),
+  createdAt: new Date(2022, 3, 1),
   author: "Flow Blockchain",
   playgroundLink:
     "https://play.onflow.org/41befd2d-31f3-47f0-ae30-aad776961e31?type=script&id=baf002e4-7124-4ffb-894e-5c04e95629de",
