@@ -1,5 +1,5 @@
-import MetadataViews from 0x01
-import NewExampleNFT from 0x02
+import "MetadataViews"
+import "ExampleNFT"
 
 access(all)
 fun main(): AnyStruct {
@@ -11,19 +11,22 @@ fun main(): AnyStruct {
     // Borrow the collection's ResolverCollection capability
     let collection = account.capabilities.borrow<&{MetadataViews.ResolverCollection}>(
         /public/exampleNFTCollection
-    ) ?? panic("Could not borrow a reference to the collection")
+    ) ?? panic("Could not borrow a reference to the collection at /public/exampleNFTCollection")
 
     // Borrow the NFT's Resolver reference
     let nft = collection.borrowViewResolver(id: id)
+        ?? panic("Could not resolve NFT with ID \(id) in the collection")
 
     // Get the Traits view for the NFT
-    let view = nft.resolveView(Type<NewExampleNFT.Traits>())
-    
+    let traitsView = nft.resolveView(Type<MetadataViews.Traits>()) 
+        ?? panic("Traits view not found for NFT with ID \(id)")
+
     // Get the Display view for the NFT
-    let oview = nft.resolveView(Type<MetadataViews.Display>())
+    let displayView = nft.resolveView(Type<MetadataViews.Display>())
+        ?? panic("Display view not found for NFT with ID \(id)")
 
     // Combine the views into a dictionary
-    let object = {"Traits": view, "Display": oview}
+    let object = {"Traits": traitsView, "Display": displayView}
 
     return object
 }
