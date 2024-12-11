@@ -115,8 +115,10 @@ access(all) contract ExampleNFT: NonFungibleToken {
                     let traitsView = MetadataViews.dictToTraits(dict: self.metadata, excludedNames: excludedTraits)
 
                     // mintedTime is a unix timestamp, we should mark it with a displayType so platforms know how to show it.
-                    let mintedTimeTrait = MetadataViews.Trait(name: "mintedTime", value: self.metadata["mintedTime"]!, displayType: "Date", rarity: nil)
-                    traitsView.addTrait(mintedTimeTrait)
+                    if let mintedTime = self.metadata["mintedTime"] as? String {
+                        let mintedTimeTrait = MetadataViews.Trait(name: "mintedTime", value: mintedTime, displayType: "Date", rarity: nil)
+                        traitsView.addTrait(mintedTimeTrait)
+                    }
 
                     // foo is a trait with its own rarity
                     let fooTraitRarity = MetadataViews.Rarity(score: 10.0, max: 100.0, description: "Common")
@@ -325,16 +327,12 @@ access(all) contract ExampleNFT: NonFungibleToken {
             name: String,
             description: String,
             thumbnail: String,
-            royalties: [MetadataViews.Royalty]
+            royalties: [MetadataViews.Royalty],
+            metadata: {String: String},
         ): @ExampleNFT.NFT {
 
-            let metadata: {String: AnyStruct} = {}
+            //let metadata: {String: AnyStruct} = {}
             let currentBlock = getCurrentBlock()
-            metadata["mintedBlock"] = currentBlock.height
-            metadata["mintedTime"] = currentBlock.timestamp
-
-            // this piece of metadata will be used to show embedding rarity into a trait
-            metadata["foo"] = "bar"
 
             // create a new NFT
             var newNFT <- create NFT(
@@ -365,7 +363,7 @@ access(all) contract ExampleNFT: NonFungibleToken {
         self.account.capabilities.publish(collectionCap, at: self.CollectionPublicPath)
 
         // Create a Minter resource and save it to storage
-        let minter <- create NFTMinter()
+        let minter: @ExampleNFT.NFTMinter <- create NFTMinter()
         self.account.storage.save(<-minter, to: self.MinterStoragePath)
     }
 }

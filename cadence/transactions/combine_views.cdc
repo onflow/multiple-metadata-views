@@ -1,32 +1,54 @@
 import "MetadataViews"
 import "ExampleNFT"
 
-access(all)
-fun main(): AnyStruct {
-    let address: Address = 0x02
-    let id: UInt64 = 0
-    
-    let account = getAccount(address)
+transaction {
 
-    // Borrow the collection's ResolverCollection capability
-    let collection = account.capabilities.borrow<&{MetadataViews.ResolverCollection}>(
-        /public/exampleNFTCollection
-    ) ?? panic("Could not borrow a reference to the collection at /public/exampleNFTCollection")
+    prepare(signer: auth(Storage, Capabilities) &Account) {
+        // Use the caller's address
+        let address: Address = signer.address
 
-    // Borrow the NFT's Resolver reference
-    let nft = collection.borrowViewResolver(id: id)
-        ?? panic("Could not resolve NFT with ID \(id) in the collection")
+        // Borrow the NFTMinter from the caller's storage
+        let minter = signer.storage.borrow<&ExampleNFT.NFTMinter>(
+            from: /storage/exampleNFTMinter
+        ) ?? panic("Could not borrow the NFT minter reference.")
 
-    // Get the Traits view for the NFT
-    let traitsView = nft.resolveView(Type<MetadataViews.Traits>()) 
-        ?? panic("Traits view not found for NFT with ID \(id)")
+        // Mint a new NFT
+        let nft <- minter.mintNFT(
+            name: "Example NFT",
+            description: "Minting a sample NFT",
+            thumbnail: "https://example.com/thumbnail.png",
+            royalties: [],
+            metadata: {
+                "Power": "100",
+                "Will": "Strong",
+                "Determination": "Unyielding"
+            },
+            
+        )
 
-    // Get the Display view for the NFT
-    let displayView = nft.resolveView(Type<MetadataViews.Display>())
-        ?? panic("Display view not found for NFT with ID \(id)")
+        let id = nft.id
 
-    // Combine the views into a dictionary
-    let object = {"Traits": traitsView, "Display": displayView}
+        // Borrow the collection capability to deposit the minted NFT
+        let collection = signer.capabilities.borrow<&ExampleNFT.Collection>(
+            /public/exampleNFTCollection
+        ) ?? panic("Could not borrow the collection reference at /public/exampleNFTCollection.")
 
-    return object
+        // Deposit the minted NFT into the collection
+        collection.deposit(token: <-nft)
+
+        // Borrow the ViewResolver for the given NFT ID
+        let resolver = collection.borrowViewResolver(id: id)
+            ?? panic("Could not borrow the ViewResolver for the NFT ID.")
+
+        // Get the Traits view for the NFT
+        let traitsView = resolver.resolveView(Type<MetadataViews.Traits>()) 
+            ?? panic("Traits view not found for NFT ID.")
+
+        // Get the Display view for the NFT
+        let displayView = resolver.resolveView(Type<MetadataViews.Display>())
+            ?? panic("Display view not found for NFT ID.")
+
+        let object = {"Traits": traitsView, "Display": displayView}
+        log(object)
+    }
 }
