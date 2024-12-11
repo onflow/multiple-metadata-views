@@ -78,13 +78,13 @@ access(all) contract ExampleNFT: NonFungibleToken {
         /// Withdraws an NFT from the Collection
         access(NonFungibleToken.Withdraw) fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT} {
             let token <- self.ownedNFTs.remove(key: withdrawID)
-                ?? panic("CustomNFT.Collection: Cannot withdraw NFT. ID not found.")
+                ?? panic("ExampleNFT.Collection: Cannot withdraw NFT. ID not found.")
             return <-token
         }
 
         /// Deposits an NFT into the Collection
         access(all) fun deposit(token: @{NonFungibleToken.NFT}) {
-            let token <- token as! @CustomNFT.NFT
+            let token <- token as! @ExampleNFT.NFT
             let id = token.id
             let oldToken <- self.ownedNFTs[id] <- token
             destroy oldToken
@@ -107,7 +107,7 @@ access(all) contract ExampleNFT: NonFungibleToken {
 
         /// Creates an empty Collection and returns it
         access(all) fun createEmptyCollection(): @{NonFungibleToken.Collection} {
-            return <-CustomNFT.createEmptyCollection()
+            return <-ExampleNFT.createEmptyCollection()
         }
     }
 
@@ -121,7 +121,7 @@ access(all) contract ExampleNFT: NonFungibleToken {
             thumbnail: String,
             traits: {String: String},
             royalties: [MetadataViews.Royalty]
-        ): @CustomNFT.NFT {
+        ): @ExampleNFT.NFT {
             return <-create NFT(
                 name: name,
                 description: description,
@@ -138,16 +138,16 @@ access(all) contract ExampleNFT: NonFungibleToken {
     }
 
     init() {
-        self.CollectionStoragePath = /storage/customNFTCollection
-        self.CollectionPublicPath = /public/customNFTCollection
-        self.MinterStoragePath = /storage/customNFTMinter
+        self.CollectionStoragePath = /storage/ExampleNFTCollection
+        self.CollectionPublicPath = /public/ExampleNFTCollection
+        self.MinterStoragePath = /storage/ExampleNFTMinter
 
         // Create and save a Collection
         let collection <- create Collection()
         self.account.storage.save(<-collection, to: self.CollectionStoragePath)
 
         // Publish the Collection's capability
-        let collectionCap = self.account.capabilities.storage.issue<&CustomNFT.Collection>(self.CollectionStoragePath)
+        let collectionCap = self.account.capabilities.storage.issue<&ExampleNFT.Collection>(self.CollectionStoragePath)
         self.account.capabilities.publish(collectionCap, at: self.CollectionPublicPath)
 
         // Create and save a Minter
