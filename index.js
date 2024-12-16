@@ -23,6 +23,6 @@ export const multipleMetadataViews = {
   transactionCode: transactionPath,
   transactionExplanation: transactionExplanationPath,
   filters: {
-    difficulty: "intermediate"
-  }
+    difficulty: "intermediate",
+  },
 };

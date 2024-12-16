@@ -1,3 +1,1 @@
-To have more than just the display view, you can create your own Struct in your contract so that it may be used as a view in your NFT.
-
-Here we create a Traits structure. We then include the Traits view in the getViews function as well as include it as an option in the resolve view function.
+You can enhance your NFT contract by adding custom views, like a Traits structure, to provide more detailed information about your NFTs. The Traits view can represent specific attributes, such as characteristics or rarity, making your NFTs more informative and versatile. To enable this, you include the Traits view in the getViews function to indicate that it is supported and update the resolveView function to return the appropriate data when the Traits view is requested. This allows your NFTs to offer richer metadata, making them suitable for a wide range of applications like gaming or collectibles.
